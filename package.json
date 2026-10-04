@@ -1,0 +1,40 @@
+{
+  "name": "link-checker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Find broken links in Markdown files. A project to learn Effect v4.",
+  "author": "",
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.ts",
+    "check": "tsc --noEmit",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "verify": "pnpm format:check && pnpm lint && pnpm check && pnpm test"
+  },
+  "dependencies": {
+    "@effect/platform-node": "^4.0.0",
+    "effect": "^4.0.0"
+  },
+  "devDependencies": {
+    "@effect/vitest": "^4.0.0",
+    "@types/node": "^26.6.4",
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "oxlint-tsgolint": "^7.0.2003",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.9.0",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.9.0"
+}
