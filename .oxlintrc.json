@@ -1,6 +1,7 @@
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "oxc", "import", "node", "vitest"],
+  "$schema": "./node_modules/@effect/tsgo/oxlint-schema.json",
+  "extends": ["./node_modules/@effect/tsgo/oxlint-presets/recommended.json"],
+  "plugins": ["typescript", "unicorn", "oxc", "import", "node", "vitest", "effecttsgo"],
   "categories": {
     "correctness": "error",
     "suspicious": "warn",
@@ -14,5 +15,13 @@
     "node": true,
     "es2024": true
   },
-  "ignorePatterns": ["node_modules", "dist", "coverage"]
+  "ignorePatterns": ["node_modules", "dist", "coverage"],
+  "overrides": [
+    {
+      "files": ["src/main.ts"],
+      "rules": {
+        "effecttsgo/strict-effect-provide": "off"
+      }
+    }
+  ]
 }

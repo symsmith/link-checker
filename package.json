@@ -6,6 +6,7 @@
   "author": "",
   "type": "module",
   "scripts": {
+    "prepare": "effect-tsgo patch --oxlint",
     "start": "node src/main.ts",
     "check": "tsc --noEmit",
     "lint": "oxlint",
@@ -21,6 +22,7 @@
     "effect": "^4.0.0"
   },
   "devDependencies": {
+    "@effect/tsgo": "^0.48.0",
     "@effect/vitest": "^4.0.0",
     "@types/node": "^26.6.4",
     "oxfmt": "^0.71.0",

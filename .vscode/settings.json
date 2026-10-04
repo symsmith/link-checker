@@ -1,5 +1,12 @@
 {
   "github.copilot.enable": {
     "*": false
+  },
+  "oxc.enable.oxfmt": true,
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "[typescript][javascript][json][jsonc]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   }
 }
