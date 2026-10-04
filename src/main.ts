@@ -1,6 +1,7 @@
-import { NodeRuntime, NodeServices } from "@effect/platform-node"
+import { NodeHttpClient, NodeRuntime, NodeServices } from "@effect/platform-node"
 import { Console, Effect, FileSystem, Path } from "effect"
 
+import { checkLink } from "./check.ts"
 import { extractLinks } from "./links.ts"
 
 const program = Effect.gen(function* () {
@@ -10,10 +11,8 @@ const program = Effect.gen(function* () {
   const fileString = yield* fs.readFileString(filePath)
   const links = extractLinks(fileString)
 
-  yield* Console.log(`Found ${links.length} links`)
-  yield* Effect.forEach(links, (link) => Console.log(`- ${link.text} -> ${link.url}`), {
-    discard: true,
-  })
+  yield* Console.log(`Checking ${links.length} links…`)
+  yield* Effect.forEach(links, checkLink, { discard: true })
 })
 
-program.pipe(Effect.provide(NodeServices.layer), NodeRuntime.runMain)
+program.pipe(Effect.provide([NodeServices.layer, NodeHttpClient.layerUndici]), NodeRuntime.runMain)

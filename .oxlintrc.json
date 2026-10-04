@@ -16,6 +16,9 @@
     "es2024": true
   },
   "ignorePatterns": ["node_modules", "dist", "coverage"],
+  "rules": {
+    "effecttsgo/unstable-api-usage": "off"
+  },
   "overrides": [
     {
       "files": ["src/main.ts"],
