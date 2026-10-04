@@ -1,10 +1,6 @@
-function result(url: string, status: number, ok: boolean): string {
-  return `${ok ? "✓" : "✗"} ${status} ${url}`
-}
+import { isStatusOk } from "./check.ts"
 
-export function formatResult(url: string, status: number): string {
-  if (status >= 200 && status < 400) {
-    return result(url, status, true)
-  }
-  return result(url, status, false)
+export function reportResult(url: string, status: number | "unreachable"): string {
+  const ok = status === "unreachable" ? false : isStatusOk(status)
+  return `${ok ? "✓" : "✗"} ${status} ${url}`
 }
