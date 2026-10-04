@@ -1,4 +1,4 @@
-import { Schema } from "effect"
+import { Schema } from "effect";
 
 export class BadStatus extends Schema.TaggedError<BadStatus>()("BadStatus", {
   url: Schema.String,
