@@ -9,8 +9,8 @@ export function reportResult(url: string, status: number | "unreachable" | "time
 }
 
 export const reportLink = Effect.fn("reportLink")(
-  function* (link: Link) {
-    const result = yield* checkLink(link);
+  function* (link: Link, timeout: Duration.Duration) {
+    const result = yield* checkLink(link, timeout);
     return reportResult(link.url, result);
   },
   Effect.catchTags({

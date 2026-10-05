@@ -17,7 +17,9 @@
   },
   "ignorePatterns": ["node_modules", "dist", "coverage"],
   "rules": {
-    "effecttsgo/unstable-api-usage": "off"
+    "effecttsgo/unstable-api-usage": "off",
+    "vitest/no-standalone-expect": ["error", { "additionalTestBlockFunctions": ["it.effect"] }],
+    "no-underscore-dangle": ["warn", { "allow": ["_tag"] }]
   },
   "overrides": [
     {

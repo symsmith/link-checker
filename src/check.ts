@@ -1,4 +1,4 @@
-import { Effect, Schedule } from "effect";
+import { Duration, Effect, Schedule } from "effect";
 import { HttpClient } from "effect/http";
 
 import { BadStatus, TimedOut, Unreachable } from "./errors.ts";
@@ -11,10 +11,10 @@ export function isStatusOk(status: number): boolean {
   return false;
 }
 
-export const checkLink = Effect.fn("checkLink")(function* (link: Link) {
+export const checkLink = Effect.fn("checkLink")(function* (link: Link, timeout: Duration.Duration) {
   const response = yield* HttpClient.get(link.url).pipe(
     Effect.mapError((cause) => new Unreachable({ url: link.url, cause })),
-    Effect.timeoutOrElse({ duration: "2 seconds", orElse: () => new TimedOut({ url: link.url }) }),
+    Effect.timeoutOrElse({ duration: timeout, orElse: () => new TimedOut({ url: link.url }) }),
     Effect.retry({ times: 2, schedule: Schedule.exponential("200 millis") }),
   );
 
