@@ -3,8 +3,8 @@ import { Duration, Effect } from "effect";
 import { checkLink, isStatusOk } from "./check.ts";
 import type { Link } from "./links.ts";
 
-export function reportResult(url: string, status: number | "unreachable"): string {
-  const ok = status === "unreachable" ? false : isStatusOk(status);
+export function reportResult(url: string, status: number | "unreachable" | "timeout"): string {
+  const ok = typeof status === "string" ? false : isStatusOk(status);
   return `${ok ? "✓" : "✗"} ${status} ${url}`;
 }
 
@@ -16,6 +16,7 @@ export const reportLink = Effect.fn("reportLink")(
   Effect.catchTags({
     BadStatus: ({ url, status }) => Effect.succeed(reportResult(url, status)),
     Unreachable: ({ url }) => Effect.succeed(reportResult(url, "unreachable")),
+    TimedOut: ({ url }) => Effect.succeed(reportResult(url, "timeout")),
   }),
 );
 

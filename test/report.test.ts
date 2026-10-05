@@ -27,6 +27,10 @@ describe("reportResult", () => {
       "✗ unreachable https://wrong.domain",
     );
   });
+
+  it("reports a timed out link", () => {
+    expect(reportResult("https://wrong.domain", "timeout")).toBe("✗ timeout https://wrong.domain");
+  });
 });
 
 describe("reportDuration", () => {
