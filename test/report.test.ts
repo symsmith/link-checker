@@ -1,7 +1,9 @@
-import { describe, expect, it } from "@effect/vitest";
-import { Duration } from "effect";
+import { describe, expect, it, layer } from "@effect/vitest";
+import { Duration, Effect, Layer } from "effect";
 
-import { reportDuration, reportResult } from "../src/report.ts";
+import { LinkChecker } from "../src/check.ts";
+import { TimedOut } from "../src/errors.ts";
+import { reportDuration, reportLink, reportResult } from "../src/report.ts";
 
 describe("reportResult", () => {
   it("reports an 200 status", () => {
@@ -38,5 +40,21 @@ describe("reportDuration", () => {
     const ms = 742.34;
     const duration = Duration.millis(ms);
     expect(reportDuration(duration)).toBe("742ms");
+  });
+});
+
+const TimeoutChecker = Layer.succeed(
+  LinkChecker,
+  LinkChecker.of({ check: (link) => Effect.fail(new TimedOut({ url: link.url })) }),
+);
+
+describe("reportLink", () => {
+  layer(TimeoutChecker)("timing out", (it) => {
+    it.effect("fails with", () =>
+      Effect.gen(function* () {
+        const report = yield* reportLink({ text: "test", url: "https://timeout.site" });
+        expect(report).toBe("✗ timeout https://timeout.site");
+      }),
+    );
   });
 });

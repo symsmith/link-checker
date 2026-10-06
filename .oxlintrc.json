@@ -19,7 +19,8 @@
   "rules": {
     "effecttsgo/unstable-api-usage": "off",
     "vitest/no-standalone-expect": ["error", { "additionalTestBlockFunctions": ["it.effect"] }],
-    "no-underscore-dangle": ["warn", { "allow": ["_tag"] }]
+    "no-underscore-dangle": ["warn", { "allow": ["_tag"] }],
+    "no-shadow": ["warn", { "allow": ["it"] }]
   },
   "overrides": [
     {

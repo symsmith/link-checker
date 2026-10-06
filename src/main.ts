@@ -1,6 +1,7 @@
 import { NodeHttpClient, NodeRuntime, NodeServices } from "@effect/platform-node";
-import { Console, Effect, FileSystem, Path } from "effect";
+import { Console, Effect, FileSystem, Layer, Path } from "effect";
 
+import { LinkChecker } from "./check.ts";
 import { Settings } from "./config.ts";
 import { extractLinks } from "./links.ts";
 import { reportDuration, reportLink } from "./report.ts";
@@ -16,16 +17,13 @@ const program = Effect.gen(function* () {
 
   yield* Console.log(`Checking ${links.length} links…`);
 
-  const [duration, results] = yield* Effect.forEach(
-    links,
-    (link) => reportLink(link, settings.timeout),
-    {
-      concurrency: settings.concurrency,
-    },
-  ).pipe(Effect.timed);
+  const [duration, results] = yield* Effect.forEach(links, reportLink, {
+    concurrency: settings.concurrency,
+  }).pipe(Effect.timed);
   yield* Effect.forEach(results, (result) => Console.log(result), { discard: true });
 
   yield* Console.log(`Done in ${reportDuration(duration)}`);
 });
 
-program.pipe(Effect.provide([NodeServices.layer, NodeHttpClient.layerUndici]), NodeRuntime.runMain);
+const LiveLinkChecker = LinkChecker.layer.pipe(Layer.provide(NodeHttpClient.layerUndici));
+program.pipe(Effect.provide([NodeServices.layer, LiveLinkChecker]), NodeRuntime.runMain);

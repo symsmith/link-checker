@@ -1,6 +1,6 @@
 import { Duration, Effect } from "effect";
 
-import { checkLink, isStatusOk } from "./check.ts";
+import { isStatusOk, LinkChecker } from "./check.ts";
 import type { Link } from "./links.ts";
 
 export function reportResult(url: string, status: number | "unreachable" | "timeout"): string {
@@ -9,8 +9,9 @@ export function reportResult(url: string, status: number | "unreachable" | "time
 }
 
 export const reportLink = Effect.fn("reportLink")(
-  function* (link: Link, timeout: Duration.Duration) {
-    const result = yield* checkLink(link, timeout);
+  function* (link: Link) {
+    const linkChecker = yield* LinkChecker;
+    const result = yield* linkChecker.check(link);
     return reportResult(link.url, result);
   },
   Effect.catchTags({
