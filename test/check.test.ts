@@ -1,5 +1,5 @@
 import { describe, expect, it, layer } from "@effect/vitest";
-import { Effect, Layer } from "effect";
+import { Duration, Effect, Layer } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/http";
 
 import { isStatusOk, LinkChecker } from "../src/check.ts";
@@ -59,25 +59,31 @@ const fakeHttp = (status: number) =>
   );
 
 describe("LinkChecker.check", () => {
-  layer(LinkChecker.layer.pipe(Layer.provide(fakeHttp(404))))("error status", (it) => {
-    it.effect("fails with BadStatus", () =>
-      Effect.gen(function* () {
-        const linkChecker = yield* LinkChecker;
-        const error = yield* linkChecker
-          .check({ text: "test", url: "https://bad.site" })
-          .pipe(Effect.flip);
-        expect(error._tag).toBe("BadStatus");
-      }),
-    );
-  });
+  layer(LinkChecker.layer(Duration.seconds(2)).pipe(Layer.provide(fakeHttp(404))))(
+    "error status",
+    (it) => {
+      it.effect("fails with BadStatus", () =>
+        Effect.gen(function* () {
+          const linkChecker = yield* LinkChecker;
+          const error = yield* linkChecker
+            .check({ text: "test", url: "https://bad.site" })
+            .pipe(Effect.flip);
+          expect(error._tag).toBe("BadStatus");
+        }),
+      );
+    },
+  );
 
-  layer(LinkChecker.layer.pipe(Layer.provide(fakeHttp(200))))("ok status", (it) => {
-    it.effect("succeeds with the same status", () =>
-      Effect.gen(function* () {
-        const linkChecker = yield* LinkChecker;
-        const status = yield* linkChecker.check({ text: "test", url: "https://good.site" });
-        expect(status).toBe(200);
-      }),
-    );
-  });
+  layer(LinkChecker.layer(Duration.seconds(2)).pipe(Layer.provide(fakeHttp(200))))(
+    "ok status",
+    (it) => {
+      it.effect("succeeds with the same status", () =>
+        Effect.gen(function* () {
+          const linkChecker = yield* LinkChecker;
+          const status = yield* linkChecker.check({ text: "test", url: "https://good.site" });
+          expect(status).toBe(200);
+        }),
+      );
+    },
+  );
 });
