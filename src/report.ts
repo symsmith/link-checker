@@ -8,18 +8,37 @@ export function reportResult(url: string, status: number | "unreachable" | "time
   return `${ok ? "✓" : "✗"} ${status} ${url}`;
 }
 
-export const reportLink = Effect.fn("reportLink")(
+type LinkReport = {
+  ok: boolean;
+  line: string;
+};
+
+function okReport(line: string): LinkReport {
+  return { line, ok: true };
+}
+
+function brokenReport(line: string): LinkReport {
+  return { line, ok: false };
+}
+
+export const reportLink: (link: Link) => Effect.Effect<LinkReport, never, LinkChecker> = Effect.fn(
+  "reportLink",
+)(
   function* (link: Link) {
     const linkChecker = yield* LinkChecker;
     const result = yield* linkChecker.check(link);
-    return reportResult(link.url, result);
+    return okReport(reportResult(link.url, result));
   },
   Effect.catchTags({
-    BadStatus: ({ url, status }) => Effect.succeed(reportResult(url, status)),
-    Unreachable: ({ url }) => Effect.succeed(reportResult(url, "unreachable")),
-    TimedOut: ({ url }) => Effect.succeed(reportResult(url, "timeout")),
+    BadStatus: ({ url, status }) => Effect.succeed(brokenReport(reportResult(url, status))),
+    Unreachable: ({ url }) => Effect.succeed(brokenReport(reportResult(url, "unreachable"))),
+    TimedOut: ({ url }) => Effect.succeed(brokenReport(reportResult(url, "timeout"))),
   }),
 );
+
+export function countBroken(reports: ReadonlyArray<LinkReport>): number {
+  return reports.reduce((acc, report) => acc + (report.ok ? 0 : 1), 0);
+}
 
 export function reportDuration(duration: Duration.Duration) {
   const ms = Math.round(Duration.toMillis(duration));

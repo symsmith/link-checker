@@ -3,7 +3,7 @@ import { Duration, Effect, Layer } from "effect";
 
 import { LinkChecker } from "../src/check.ts";
 import { TimedOut } from "../src/errors.ts";
-import { reportDuration, reportLink, reportResult } from "../src/report.ts";
+import { countBroken, reportDuration, reportLink, reportResult } from "../src/report.ts";
 
 describe("reportResult", () => {
   it("reports an 200 status", () => {
@@ -53,8 +53,49 @@ describe("reportLink", () => {
     it.effect("fails with", () =>
       Effect.gen(function* () {
         const report = yield* reportLink({ text: "test", url: "https://timeout.site" });
-        expect(report).toBe("✗ timeout https://timeout.site");
+        expect(report.line).toBe("✗ timeout https://timeout.site");
+        expect(report.ok).toBe(false);
       }),
     );
+  });
+});
+
+describe("countBroken", () => {
+  it("counts 0 for no broken link", () => {
+    expect(
+      countBroken([
+        { line: "test1", ok: true },
+        { line: "test2", ok: true },
+      ]),
+    ).toBe(0);
+  });
+
+  it("counts 0 for no links", () => {
+    expect(countBroken([])).toBe(0);
+  });
+
+  it("counts 1 with a broken link and a non-broken link", () => {
+    expect(
+      countBroken([
+        { line: "test1", ok: false },
+        { line: "test2", ok: true },
+      ]),
+    ).toBe(1);
+    expect(
+      countBroken([
+        { line: "test1", ok: true },
+        { line: "test2", ok: false },
+      ]),
+    ).toBe(1);
+  });
+
+  it("counts correctly with only broken links", () => {
+    expect(countBroken([{ line: "test2", ok: false }])).toBe(1);
+    expect(
+      countBroken([
+        { line: "test1", ok: false },
+        { line: "test2", ok: false },
+      ]),
+    ).toBe(2);
   });
 });

@@ -13,3 +13,8 @@ export class Unreachable extends Schema.TaggedError<Unreachable>()("Unreachable"
 export class TimedOut extends Schema.TaggedError<TimedOut>()("TimedOut", {
   url: Schema.String,
 }) {}
+
+export class BrokenLinks extends Schema.TaggedError<BrokenLinks>()("BrokenLinks", {
+  broken: Schema.Natural,
+  total: Schema.Natural,
+}) {}

@@ -1,10 +1,11 @@
 import { NodeHttpClient } from "@effect/platform-node";
 import { Config, Console, Duration, Effect, FileSystem, Layer, Schema } from "effect";
-import { Argument, Command, Flag } from "effect/cli";
+import { Argument, CliError, Command, Flag } from "effect/cli";
 
 import { LinkChecker } from "./check.ts";
+import { BrokenLinks } from "./errors.ts";
 import { extractLinks } from "./links.ts";
-import { reportDuration, reportLink } from "./report.ts";
+import { countBroken, reportDuration, reportLink } from "./report.ts";
 
 const file = Argument.File("file", { mustExist: true }).pipe(
   Argument.withDescription("The Markdown file to check"),
@@ -40,9 +41,20 @@ export const cli = Command.make("link-checker", { file, concurrency, timeout }, 
     const [duration, results] = yield* Effect.forEach(links, reportLink, {
       concurrency: input.concurrency,
     }).pipe(Effect.timed);
-    yield* Effect.forEach(results, (result) => Console.log(result), { discard: true });
+    yield* Effect.forEach(results, (result) => Console.log(result.line), { discard: true });
 
     yield* Console.log(`Done in ${reportDuration(duration)}`);
+
+    const brokenLinks = countBroken(results);
+
+    if (brokenLinks > 0) {
+      return yield* new CliError.UserError({
+        cause: new BrokenLinks({ broken: brokenLinks, total: links.length }),
+        userMessage: `${brokenLinks} of ${links.length} links ${brokenLinks > 1 ? "are" : "is"} broken`,
+      });
+    }
+
+    return yield* Console.log("All links work ✓");
   }),
 ).pipe(
   Command.withDescription("Check that the links in a Markdown file are valid"),
